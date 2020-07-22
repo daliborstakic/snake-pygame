@@ -5,12 +5,17 @@ pygame.init()
 
 class Cube(object):
     def __init__(self, start_pos, dir_x=1, dir_y=0, color=(0, 255, 0)):
-        pass
+        self.pos = start_pos
+        self.dir_x = 1
+        self.dir_y = 0
+        self.color = color
 
-    def move(self):
-        pass
+    def move(self, dir_x, dir_y):
+        self.dir_x = dir_x
+        self.dir_y = dir_y
+        self.pos = (self.pos[0] + self.dir_x, self.pos[1] + self.dir_y)
 
-    def draw(self, win):
+    def draw(self):
         pass
 
 
@@ -83,7 +88,8 @@ class Snake(object):
         pass
 
     def draw(self):
-        pass
+        for i, c in enumerate(self.body):
+            c.draw()
 
 
 # Screen
