@@ -16,7 +16,12 @@ class Cube(object):
         self.pos = (self.pos[0] + self.dir_x, self.pos[1] + self.dir_y)
 
     def draw(self):
-        pass
+        dis = 500 // 20
+        i = self.pos[0]  # Current row
+        j = self.pos[1]  # Current column
+
+        pygame.draw.rect(win, self.color, (i * dis + 1, j * dis + 1, dis - 2, dis - 2))  # Drawing the rectangle
+        # Minus 2 just so it doesn't fill up the whole rectangle
 
 
 class Snake(object):
@@ -38,28 +43,32 @@ class Snake(object):
         self.dir_y = 0
 
     def move(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
         keys = pygame.key.get_pressed()  # Get multiple key presses
 
         for key in keys:
             if keys[pygame.K_LEFT]:
                 self.dir_x = -1
                 self.dir_y = 0
-                self.turns[self.head.pos[:]] == [self.dir_x, self.dir_y]  # Remembering the direction
+                self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]  # Remembering the direction
 
             elif keys[pygame.K_RIGHT]:
                 self.dir_x = 1
                 self.dir_y = 0
-                self.turns[self.head.pos[:]] == [self.dir_x, self.dir_y]
+                self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]
 
             elif keys[pygame.K_UP]:
                 self.dir_x = 0
                 self.dir_y = -1
-                self.turns[self.head.pos[:]] == [self.dir_x, self.dir_y]
+                self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]
 
             elif keys[pygame.K_DOWN]:
                 self.dir_x = 0
                 self.dir_y = 1
-                self.turns[self.head.pos[:]] == [self.dir_x, self.dir_y]
+                self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]
 
         for i, c in enumerate(self.body):  # Loop through every cube in the body list
             p = c.pos[:]  # Cube position in the grid
@@ -70,16 +79,16 @@ class Snake(object):
                     self.turns.pop(p)  # It removes the turn
             else:
                 # This code just makes the snake appear on the other side if it goes past the screen boundaries
-                if c.dirnx == -1 and c.pos[0] <= 0:
-                    c.pos = (c.rows - 1, c.pos[1])
-                elif c.dirnx == 1 and c.pos[0] >= c.rows - 1:
+                if c.dir_x == -1 and c.pos[0] <= 0:
+                    c.pos = (19, c.pos[1])
+                elif c.dir_x == 1 and c.pos[0] >= 19:
                     c.pos = (0, c.pos[1])
-                elif c.dirny == 1 and c.pos[1] >= c.rows - 1:
+                elif c.dir_y == 1 and c.pos[1] >= 19:
                     c.pos = (c.pos[0], 0)
-                elif c.dirny == -1 and c.pos[1] <= 0:
-                    c.pos = (c.pos[0], c.rows - 1)
+                elif c.dir_y == -1 and c.pos[1] <= 0:
+                    c.pos = (c.pos[0], 19)
                 else:
-                    c.move(c.dirnx, c.dirny)
+                    c.move(c.dir_x, c.dir_y)
 
     def reset(self):
         pass
@@ -121,17 +130,24 @@ def draw_grid(w, rows):
 
 
 def render():
+    global s
     win.fill(WHITE)
+    s.draw()
     draw_grid(500, 20)
     pygame.display.update()
 
 
 def main():
+    global s
+
     run = True
+
+    s = Snake((255, 0, 0), (10, 10))
 
     while run:
         clock.tick(FPS)
         pygame.time.delay(50)
+        s.move()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
