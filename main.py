@@ -1,5 +1,7 @@
 import pygame
 import random
+import tkinter
+from tkinter import messagebox
 
 pygame.init()
 
@@ -91,16 +93,19 @@ class Snake(object):
                 else:
                     c.move(c.dir_x, c.dir_y)
 
-    def reset(self):
-        pass
+    def reset(self, pos):
+        self.head = Cube(pos)
+        self.body = []
+        self.body.append(self.head)
+        self.dir_x = 1
+        self.dir_y = 0
+        self.turns = {}
 
     def add_cube(self):
         tail = self.body[-1]
         dx, dy = tail.dir_x, tail.dir_y
 
-        # We need to know which side of the snake to add the cube to.
-        # So we check what direction we are currently moving in to determine if we
-        # need to add the cube to the left, right, above or below.
+        # We need to check to which side of the snake to add the cube to
         if dx == 1 and dy == 0:
             self.body.append(Cube((tail.pos[0] - 1, tail.pos[1])))
         elif dx == -1 and dy == 0:
@@ -131,6 +136,9 @@ GRAY = (226, 226, 226)
 clock = pygame.time.Clock()
 FPS = 10
 
+# Fonts
+SCORE_FONT = pygame.font.SysFont('helvetica', 30)
+
 
 def draw_grid(w, rows):
     gap = w // rows
@@ -149,10 +157,12 @@ def draw_grid(w, rows):
 
 def render():
     global s, snack
+    score_text = SCORE_FONT.render("Score: {}".format(str(len(s.body))), 1, (0, 0, 0))
     win.fill(WHITE)
     s.draw()
     snack.draw()
     draw_grid(500, 20)
+    win.blit(score_text, (10, 10))
     pygame.display.update()
 
 
@@ -170,7 +180,19 @@ def random_snack(rows, item):
         else:
             break
 
+    # Returns the position of the snack
     return x, y
+
+
+def message_box(subject, content):
+    root = tkinter.Tk()
+    root.attributes("-topmost", True)
+    root.withdraw()
+    messagebox.showinfo(subject, content)
+    try:
+        root.destroy()
+    except:
+        pass
 
 
 def main():
@@ -190,6 +212,13 @@ def main():
             print("Gje")
             s.add_cube()  # Adds a new cube to the snake
             snack = Cube(random_snack(20, s), color=(255, 0, 0))
+
+        for x in range(len(s.body)):
+            # This will check if any of the positions in our body list overlap
+            if s.body[x].pos in list(map(lambda z: z.pos, s.body[x + 1:])):
+                message_box('You Lost!', 'Play again...')
+                s.reset((10, 10))
+                break
 
         render()
 
