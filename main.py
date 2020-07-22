@@ -48,28 +48,28 @@ class Snake(object):
             if event.type == pygame.QUIT:
                 pygame.quit()
 
-        keys = pygame.key.get_pressed()  # Get multiple key presses
+            keys = pygame.key.get_pressed()  # Get multiple key presses
 
-        for key in keys:
-            if keys[pygame.K_LEFT]:
-                self.dir_x = -1
-                self.dir_y = 0
-                self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]  # Remembering the direction
+            for key in keys:
+                if keys[pygame.K_LEFT]:
+                    self.dir_x = -1
+                    self.dir_y = 0
+                    self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]  # Remembering the direction
 
-            elif keys[pygame.K_RIGHT]:
-                self.dir_x = 1
-                self.dir_y = 0
-                self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]
+                elif keys[pygame.K_RIGHT]:
+                    self.dir_x = 1
+                    self.dir_y = 0
+                    self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]
 
-            elif keys[pygame.K_UP]:
-                self.dir_x = 0
-                self.dir_y = -1
-                self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]
+                elif keys[pygame.K_UP]:
+                    self.dir_x = 0
+                    self.dir_y = -1
+                    self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]
 
-            elif keys[pygame.K_DOWN]:
-                self.dir_x = 0
-                self.dir_y = 1
-                self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]
+                elif keys[pygame.K_DOWN]:
+                    self.dir_x = 0
+                    self.dir_y = 1
+                    self.turns[self.head.pos[:]] = [self.dir_x, self.dir_y]
 
         for i, c in enumerate(self.body):  # Loop through every cube in the body list
             p = c.pos[:]  # Cube position in the grid
@@ -95,7 +95,24 @@ class Snake(object):
         pass
 
     def add_cube(self):
-        pass
+        tail = self.body[-1]
+        dx, dy = tail.dir_x, tail.dir_y
+
+        # We need to know which side of the snake to add the cube to.
+        # So we check what direction we are currently moving in to determine if we
+        # need to add the cube to the left, right, above or below.
+        if dx == 1 and dy == 0:
+            self.body.append(Cube((tail.pos[0] - 1, tail.pos[1])))
+        elif dx == -1 and dy == 0:
+            self.body.append(Cube((tail.pos[0] + 1, tail.pos[1])))
+        elif dx == 0 and dy == 1:
+            self.body.append(Cube((tail.pos[0], tail.pos[1] - 1)))
+        elif dx == 0 and dy == -1:
+            self.body.append(Cube((tail.pos[0], tail.pos[1] + 1)))
+
+        # We then set the cubes direction to the direction of the snake.
+        self.body[-1].dir_x = dx
+        self.body[-1].dir_y = dy
 
     def draw(self):
         for i, c in enumerate(self.body):
@@ -131,31 +148,33 @@ def draw_grid(w, rows):
 
 
 def render():
-    global s
+    global s, snack
     win.fill(WHITE)
     s.draw()
+    snack.draw()
     draw_grid(500, 20)
     pygame.display.update()
 
 
 def random_snack(rows, item):
-    positions = item.body  # Gets all positions of cubes in the snake
+    positions = item.body  # Get the positions of cubes in the snake
 
-    while True:  # Keeps generating snacks
+    while True:
+        # Random snack position
         x = random.randrange(rows)
         y = random.randrange(rows)
 
-        # Making sure that the snack isn't the same
-        # position as the snake
-
+        # Setting the snack so it can't be on the same position as the snake
         if len(list(filter(lambda z: z.pos == (x, y), positions))) > 0:
             continue
         else:
             break
 
+    return x, y
+
 
 def main():
-    global s
+    global s, snack
 
     run = True
 
@@ -167,9 +186,10 @@ def main():
         pygame.time.delay(50)
         s.move()
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
+        if snack.pos == s.body[0].pos:  # Checks if the head collides with the snack
+            print("Gje")
+            s.add_cube()  # Adds a new cube to the snake
+            snack = Cube(random_snack(20, s), color=(255, 0, 0))
 
         render()
 
