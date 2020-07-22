@@ -1,4 +1,5 @@
 import pygame
+import random
 
 pygame.init()
 
@@ -137,12 +138,29 @@ def render():
     pygame.display.update()
 
 
+def random_snack(rows, item):
+    positions = item.body  # Gets all positions of cubes in the snake
+
+    while True:  # Keeps generating snacks
+        x = random.randrange(rows)
+        y = random.randrange(rows)
+
+        # Making sure that the snack isn't the same
+        # position as the snake
+
+        if len(list(filter(lambda z: z.pos == (x, y), positions))) > 0:
+            continue
+        else:
+            break
+
+
 def main():
     global s
 
     run = True
 
     s = Snake((255, 0, 0), (10, 10))
+    snack = Cube(random_snack(20, s), color=(255, 0, 0))
 
     while run:
         clock.tick(FPS)
