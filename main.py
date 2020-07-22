@@ -3,7 +3,7 @@ import pygame
 pygame.init()
 
 
-class Cube:
+class Cube(object):
     def __init__(self, start_pos, dir_x=1, dir_y=0, color=(0, 255, 0)):
         pass
 
@@ -14,7 +14,7 @@ class Cube:
         pass
 
 
-class Snake:
+class Snake(object):
     body = []  # List containing multiple cube objects which represent the body
 
     # This is an dictionary which stores the point of turn so the snake won't turn as a whole,
@@ -33,7 +33,48 @@ class Snake:
         self.dir_y = 0
 
     def move(self):
-        pass
+        keys = pygame.key.get_pressed()  # Get multiple key presses
+
+        for key in keys:
+            if keys[pygame.K_LEFT]:
+                self.dir_x = -1
+                self.dir_y = 0
+                self.turns[self.head.pos[:]] == [self.dir_x, self.dir_y]  # Remembering the direction
+
+            elif keys[pygame.K_RIGHT]:
+                self.dir_x = 1
+                self.dir_y = 0
+                self.turns[self.head.pos[:]] == [self.dir_x, self.dir_y]
+
+            elif keys[pygame.K_UP]:
+                self.dir_x = 0
+                self.dir_y = -1
+                self.turns[self.head.pos[:]] == [self.dir_x, self.dir_y]
+
+            elif keys[pygame.K_DOWN]:
+                self.dir_x = 0
+                self.dir_y = 1
+                self.turns[self.head.pos[:]] == [self.dir_x, self.dir_y]
+
+        for i, c in enumerate(self.body):  # Loop through every cube in the body list
+            p = c.pos[:]  # Cube position in the grid
+            if p in self.turns:
+                turn = self.turns[p]  # Direction for the next turn
+                c.move(turn[0], turn[1])
+                if i == len(self.body) - 1:  # If it's the last cube
+                    self.turns.pop(p)  # It removes the turn
+            else:
+                # This code just makes the snake appear on the other side if it goes past the screen boundaries
+                if c.dirnx == -1 and c.pos[0] <= 0:
+                    c.pos = (c.rows - 1, c.pos[1])
+                elif c.dirnx == 1 and c.pos[0] >= c.rows - 1:
+                    c.pos = (0, c.pos[1])
+                elif c.dirny == 1 and c.pos[1] >= c.rows - 1:
+                    c.pos = (c.pos[0], 0)
+                elif c.dirny == -1 and c.pos[1] <= 0:
+                    c.pos = (c.pos[0], c.rows - 1)
+                else:
+                    c.move(c.dirnx, c.dirny)
 
     def reset(self):
         pass
